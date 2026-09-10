@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Produktdaten bearbeiten | B-T Maschinenwelt</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="editor-shell">
+  <a href="index.html" class="text-link">← Zur Website</a>
+  <h1>Produktdaten bearbeiten</h1>
+  <p>Hier kannst du Bilder, Beschreibungen und technische Daten für jedes Produkt ergänzen. Danach lädst du die neue <b>products.js</b> herunter und ersetzt die alte Datei bei GitHub.</p>
+  <div class="editor-help"><b>Bild einfügen:</b> Lade das Bild bei GitHub in den Ordner <code>assets/products</code> hoch und trage hier z. B. <code>assets/products/kehrmaschine-14m.jpg</code> ein. Alternativ funktioniert auch eine vollständige Bild-URL.</div>
+  <div class="editor-actions" style="margin-bottom:20px">
+    <button class="btn primary" onclick="downloadProducts()">Neue products.js herunterladen</button>
+    <button class="btn ghost" onclick="resetEdits()">Lokale Änderungen zurücksetzen</button>
+  </div>
+  <div class="editor-grid">
+    <div class="editor-list"><input id="editorSearch" placeholder="Produkt suchen …" oninput="renderList()"><div id="editorList"></div></div>
+    <div class="editor-form">
+      <div id="emptyState"><h2>Produkt auswählen</h2><p>Links ein Produkt anklicken.</p></div>
+      <form id="editForm" style="display:none" onsubmit="saveCurrent(event)">
+        <input type="hidden" id="id">
+        <label>Produktname<input id="name"></label>
+        <label>Kategorie<input id="category"></label>
+        <div class="row"><label>Preis von (€)<input id="priceMin" type="number" step="0.01"></label><label>Preis bis (€)<input id="priceMax" type="number" step="0.01"></label></div>
+        <label>Bildpfad oder Bild-URL<input id="image" placeholder="assets/products/mein-produkt.jpg" oninput="updatePreview()"></label>
+        <div class="preview-image" id="imagePreview"><span>Noch kein Bild</span></div>
+        <label>Kurzbeschreibung<textarea id="description" rows="4" placeholder="Kurze Verkaufsbeschreibung"></textarea></label>
+        <label>Technische Daten / ausführliche Beschreibung<textarea id="technicalDetails" rows="10" placeholder="Arbeitsbreite: ...&#10;Gewicht: ...&#10;Aufnahme: ...&#10;Hydraulik: ..."></textarea></label>
+        <label><input id="active" type="checkbox" style="width:auto;margin-right:7px"> Produkt im Shop anzeigen</label>
+        <div class="editor-actions"><button class="btn primary" type="submit">Änderung speichern</button></div>
+      </form>
+    </div>
+  </div>
+</div>
+<script src="products.js"></script>
+<script>
+const STORE='bt_product_edits_v1';
+let original=window.BT_PRODUCTS||[];
+let edits=JSON.parse(localStorage.getItem(STORE)||'{}');
+let currentId=null;
+function mergedProducts(){return original.map(p=>Object.assign({},p,edits[p.id]||{}));}
+function renderList(){
+  const q=(document.getElementById('editorSearch').value||'').toLowerCase(), box=document.getElementById('editorList');
+  const list=mergedProducts().filter(p=>(p.name+' '+p.category).toLowerCase().includes(q));
+  box.innerHTML=list.map(p=>`<div class="editor-item ${p.id===currentId?'active':''}" onclick="selectProduct(${p.id})"><b>${p.id}</b> · ${escapeHtml(p.name)}<br><small>${escapeHtml(p.category)}</small></div>`).join('');
+}
+function selectProduct(id){
+  currentId=id; const p=mergedProducts().find(x=>x.id===id); if(!p)return;
+  document.getElementById('emptyState').style.display='none'; document.getElementById('editForm').style.display='block';
+  ['id','name','category','image','description','technicalDetails'].forEach(k=>document.getElementById(k).value=p[k]??'');
+  document.getElementById('priceMin').value=p.priceMin??''; document.getElementById('priceMax').value=p.priceMax??'';
+  document.getElementById('active').checked=p.active!==false; updatePreview(); renderList();
+}
+function saveCurrent(e){
+  e.preventDefault(); if(currentId==null)return;
+  edits[currentId]={name:document.getElementById('name').value,category:document.getElementById('category').value,image:document.getElementById('image').value.trim(),description:document.getElementById('description').value,technicalDetails:document.getElementById('technicalDetails').value,priceMin:numOrNull(document.getElementById('priceMin').value),priceMax:numOrNull(document.getElementById('priceMax').value),active:document.getElementById('active').checked};
+  localStorage.setItem(STORE,JSON.stringify(edits)); alert('Gespeichert. Danach neue products.js herunterladen und bei GitHub ersetzen.'); renderList();
+}
+function numOrNull(v){return v===''?null:Number(v)}
+function updatePreview(){
+  const url=document.getElementById('image').value.trim(), box=document.getElementById('imagePreview');
+  box.innerHTML=url?`<img src="${escapeAttr(url)}" onerror="this.parentNode.innerHTML='<span>Bild konnte nicht geladen werden</span>'">`:'<span>Noch kein Bild</span>';
+}
+function downloadProducts(){
+  const content='window.BT_PRODUCTS = '+JSON.stringify(mergedProducts(),null,2)+';\n';
+  const blob=new Blob([content],{type:'text/javascript;charset=utf-8'}), a=document.createElement('a');
+  a.href=URL.createObjectURL(blob); a.download='products.js'; a.click(); URL.revokeObjectURL(a.href);
+}
+function resetEdits(){if(confirm('Alle lokal gespeicherten Produktänderungen löschen?')){localStorage.removeItem(STORE);location.reload();}}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+function escapeAttr(s){return escapeHtml(s)}
+renderList();
+</script>
+</body></html>
