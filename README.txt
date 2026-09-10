@@ -35,3 +35,15 @@ ROT-SCHWARZ-VERSION:
 - Farbwelt auf Rot / Schwarz / Weiß angepasst
 - Produkteditor bleibt enthalten
 - Alle bisherigen Produktdaten und Funktionen bleiben erhalten
+
+FESTPREIS-/KAUF-VERSION:
+- Bei Preisbereichen wurde der bisher höchste Preis als Festpreis gesetzt.
+- "Kaufen" öffnet eine vorbereitete Bestell-E-Mail an btmaschinenwelt@gmail.com.
+- Der Kunde muss die E-Mail selbst absenden.
+
+EBAY-PREISE + VOLLFOTO:
+- Preise aus der B-T eBay-Produktliste übernommen.
+- Bei zusammengeführten eBay-Anzeigen kann eine Preisspanne erscheinen.
+- Produktbilder im Shop werden vollständig angezeigt, nicht zugeschnitten.
+- Detailansicht zeigt ebenfalls das ganze Produktfoto.
+- KINGSPAN 1500 L (Nr. 188) ist mit dem hochgeladenen Bildpfad verknüpft.

@@ -29,10 +29,10 @@ const BT = (() => {
         <span class="product-cat">${esc(p.category)}</span>
         <h3>${esc(p.name)}</h3>
         ${p.description ? `<p class="product-desc">${esc(p.description)}</p>` : ''}
-        <div class="price">${priceText(p)}<small>Preisangabe freibleibend</small></div>
+        <div class="price">${priceText(p)}<small>${p.priceSource==='eBay'?'Preis laut eBay-Angebot':'Preis inkl. MwSt.'}</small></div>
         <div class="product-actions">
           <button class="btn ghost" onclick="BT.openProduct(${p.id})">Details</button>
-          <button class="btn primary" onclick="BT.add(${p.id})">Merken</button>
+          <button class="btn primary" onclick="BT.buyNow(${p.id})">Kaufen</button>
         </div>
       </div>
     </article>`;
@@ -74,11 +74,26 @@ const BT = (() => {
         <div><small>Preis bis</small><b>${p.priceMax!=null?fmt.format(p.priceMax):'auf Anfrage'}</b></div>
       </div>
       ${details}
-      <button class="btn primary large" onclick="BT.add(${p.id});BT.closeProduct()">Zur Anfrage hinzufügen</button>`;
+      <button class="btn primary large" onclick="BT.buyNow(${p.id})">Jetzt kaufen</button>`;
     modal.classList.add('open'); modal.setAttribute('aria-hidden','false');
   }
   function closeProduct(){const m=document.getElementById('productModal');if(m){m.classList.remove('open');m.setAttribute('aria-hidden','true');}}
   function toggleMenu(){document.getElementById('mainMenu')?.classList.toggle('open');}
+
+  function buyNow(id){
+    const p=products.find(x=>x.id===id); if(!p)return;
+    const price=p.priceMin!=null?fmt.format(p.priceMin):'Preis auf Anfrage';
+    const subject=encodeURIComponent(`Bestellung: ${p.name}`);
+    const body=encodeURIComponent(
+      `Guten Tag B-T Maschinenwelt,\n\n`+
+      `ich möchte folgendes Produkt bestellen:\n\n`+
+      `Produkt-Nr.: ${p.id}\nProdukt: ${p.name}\nKategorie: ${p.category}\nMenge: 1\nFestpreis: ${price} inkl. MwSt.\n\n`+
+      `Bitte bestätigen Sie Lieferkosten, Lieferzeit und Zahlungsinformationen.\n\n`+
+      `Firma/Name:\nStraße/Hausnummer:\nPLZ/Ort:\nTelefon:\nE-Mail:\n\nMit freundlichen Grüßen`
+    );
+    location.href=`mailto:btmaschinenwelt@gmail.com?subject=${subject}&body=${body}`;
+  }
+
   function prepareMail(e){
     e.preventDefault();
     const d=new FormData(e.target);
@@ -120,5 +135,5 @@ const BT = (() => {
   }
   document.addEventListener('DOMContentLoaded',()=>{renderCart();initShop();initFeatured();});
   document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeCart();closeProduct();}});
-  return {add,remove,clearCart,openCart,closeCart,openProduct,closeProduct,toggleMenu,prepareMail};
+  return {add,remove,clearCart,openCart,closeCart,openProduct,closeProduct,toggleMenu,prepareMail,buyNow};
 })();
