@@ -1,0 +1,4 @@
+Produktbilder hier ablegen.
+Beispiel:
+assets/products/kehrmaschine-140.jpg
+assets/products/betonmischer-600.jpg
